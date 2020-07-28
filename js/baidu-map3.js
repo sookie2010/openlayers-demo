@@ -1,41 +1,38 @@
 (function(){
 
-var bd09Extent = [-20037726.37, -12474104.17, 20037726.37, 12474104.17];
-var baiduMercator = new ol.proj.Projection({
+const bd09Extent = [-20037726.37, -12474104.17, 20037726.37, 12474104.17]
+const baiduMercator = new ol.proj.Projection({
   code: 'baidu',
   extent: bd09Extent,
   units: 'm'
-});
-ol.proj.addProjection(baiduMercator);
-ol.proj.addCoordinateTransforms('EPSG:4326', baiduMercator, projzh.ll2bmerc, projzh.bmerc2ll);
-ol.proj.addCoordinateTransforms('EPSG:3857', baiduMercator, projzh.smerc2bmerc, projzh.bmerc2smerc);
+})
+ol.proj.addProjection(baiduMercator)
+ol.proj.addCoordinateTransforms('EPSG:4326', baiduMercator, projzh.ll2bmerc, projzh.bmerc2ll)
+ol.proj.addCoordinateTransforms('EPSG:3857', baiduMercator, projzh.smerc2bmerc, projzh.bmerc2smerc)
 
-const bmercResolutions = new Array(19);
-for (var i = 0; i < 19; ++i) {
-  bmercResolutions[i] = Math.pow(2, 18 - i);
+const bmercResolutions = new Array(19)
+for (let i = 0 ; i < 19 ; i++) {
+  bmercResolutions[i] = Math.pow(2, 18 - i)
 }
 
-const urls = [0, 1, 2, 3].map(function(sub) {
-  return `http://maponline${sub}.bdimg.com/tile/?qt=vtile&x={x}&y={y}&z={z}&styles=pl&scaler=1&udt=20191119`
-})
 const baiduLayer = new ol.layer.Tile({
   source: new ol.source.XYZ({
     projection: 'baidu',
     maxZoom: 18,
     tileUrlFunction: function(tileCoord) {
-      var x = tileCoord[1];
-      var y = -tileCoord[2] - 1;
-      var z = tileCoord[0];
-      var hash = (x << z) + y;
-      var index = hash % urls.length;
-      index = index < 0 ? index + urls.length : index;
+      let x = tileCoord[1]
+      let y = -tileCoord[2] - 1
+      let z = tileCoord[0]
+      let hash = (x << z) + y
+      let index = hash % 4
+      index = index < 0 ? index + 4 : index
       if (x < 0) {
-        x = 'M' + -x;
+        x = 'M' + -x
       }
       if (y < 0) {
-        y = 'M' + -y;
+        y = 'M' + -y
       }
-      return urls[index].replace('{x}', x).replace('{y}', y) .replace('{z}', z);
+      return `http://maponline${index}.bdimg.com/tile/?qt=vtile&x=${x}&y=${y}&z=${z}&styles=pl&scaler=1&udt=20191119`
     },
     tileGrid: new ol.tilegrid.TileGrid({
       resolutions: bmercResolutions,
@@ -49,6 +46,7 @@ const scaleLineControl = new ol.control.ScaleLine({
   // className: 'custom-scale-line',      //设置比例尺元素的class
   // target: document.getElementById('scale-line') //显示比例尺的目标容器
 })
+// 鼠标定位点坐标显示
 const mousePositionControl = new ol.control.MousePosition({})
 const map = new ol.Map({
   target: 'map',
