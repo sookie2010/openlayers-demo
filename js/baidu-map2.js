@@ -1,68 +1,86 @@
-(function(){
+define(['../lib/ol', '../lib/projzh'], function(ol, projzh) {
+  return function() {
+    const bd09Extent = [-20037726.37, -12474104.17, 20037726.37, 12474104.17]
+    const baiduMercator = new ol.proj.Projection({
+      code: 'baidu',
+      extent: bd09Extent,
+      units: 'm'
+    })
+    ol.proj.addProjection(baiduMercator)
+    ol.proj.addCoordinateTransforms('EPSG:4326', baiduMercator, projzh.ll2bmerc, projzh.bmerc2ll)
+    ol.proj.addCoordinateTransforms('EPSG:3857', baiduMercator, projzh.smerc2bmerc, projzh.bmerc2smerc)
 
-/* 定义百度投影，这是实现无偏移加载百度地图离线瓦片核心所在。
-网上很多相关资料在用OpenLayers加载百度地图离线瓦片时都认为投影就是EPSG:3857(也就是Web墨卡托投影)。
-事实上这是错误的，因此无法做到无偏移加载。
-百度地图有自己独特的投影体系，必须在OpenLayers中自定义百度投影，才能实现无偏移加载。
-百度投影实现的核心文件为bd09.js，在迈高图官网可以找到查看这个文件。 */
-var projBD09 = new ol.proj.Projection({
-    code: 'BD:09',
-    extent : [-20037726.37,-11708041.66,20037726.37,12474104.17],
-    units: 'm',
-    axisOrientation: 'neu',
-    global: false
-});  
-      
-ol.proj.addProjection(projBD09);
-ol.proj.addCoordinateTransforms("EPSG:4326", "BD:09",
-    function (coordinate) {
-        return lngLatToMercator(coordinate);
-    },
-    function (coordinate) {
-        return mercatorToLngLat(coordinate);
+    const bmercResolutions = new Array(19)
+    for (let i = 0 ; i < 19 ; i++) {
+      bmercResolutions[i] = Math.pow(2, 18 - i)
     }
-);
 
-/*定义百度地图分辨率与瓦片网格*/
-var resolutions = [];
-for (var i = 0; i <= 18; i++) {
-    resolutions[i] = Math.pow(2, 18 - i);
-}
-
-var tilegrid = new ol.tilegrid.TileGrid({
-    origin: [0, 0],
-    resolutions: resolutions
-});
-
-/*加载百度地图离线瓦片不能用ol.source.XYZ，ol.source.XYZ针对谷歌地图（注意：是谷歌地图）而设计，
-而百度地图与谷歌地图使用了不同的投影、分辨率和瓦片网格。因此这里使用ol.source.TileImage来自行指定
-投影、分辨率、瓦片网格。*/
-var source = new ol.source.TileImage({
-    projection: "BD:09",
-    tileGrid: tilegrid,
-    tileUrlFunction: function(tileCoord, pixelRatio, proj) {
-        var z = tileCoord[0];
-        var x = tileCoord[1];
-        var y = tileCoord[2];
-
-        return 'tiles/' + z + '/' + x + '/' + y + '.png';
+    const baiduLayer = new ol.layer.Tile({
+      source: new ol.source.XYZ({
+        projection: 'baidu',
+        maxZoom: 18,
+        tileUrlFunction: function(tileCoord) {
+          let x = tileCoord[1]
+          let y = -tileCoord[2] - 1
+          let z = tileCoord[0]
+          let hash = (x << z) + y
+          let index = (hash + 4) % 4
+          if (x < 0) {
+            x = 'M' + -x
+          }
+          if (y < 0) {
+            y = 'M' + -y
+          }
+          return `http://maponline${index}.bdimg.com/tile/?qt=vtile&x=${x}&y=${y}&z=${z}&styles=pl&scaler=1&udt=20191119`
+        },
+        tileGrid: new ol.tilegrid.TileGrid({
+          resolutions: bmercResolutions,
+          origin: [0, 0]
+        })
+      })
+    })
+    // 比例尺
+    const scaleLineControl = new ol.control.ScaleLine({
+      units: 'metric',                     //设置比例尺单位，有degrees、imperial、us、nautical或metric
+    })
+    // 鼠标定位点坐标显示
+    const mousePositionControl = new ol.control.MousePosition({
+      projection: 'EPSG:4326'
+    })
+    const map = new ol.Map({
+      target: 'map',
+      layers: [baiduLayer],
+      view: new ol.View({
+        center: ol.proj.transform([121.51, 31.55], 'EPSG:4326', 'baidu'),
+        zoom: 6,
+        projection: 'baidu',
+        extent: bd09Extent
+      }),
+      controls: ol.control.defaults().extend([scaleLineControl, mousePositionControl])
+    })
+    // 地图标点
+    const markVectorSource = new ol.source.Vector()
+    const markVectorLayer = new ol.layer.Vector({
+      source: markVectorSource,
+      style: new ol.style.Style({
+        image: new ol.style.Icon({
+          opacity: 0.75,
+          src: '../images/map_marker.png'
+        }),
+      })
+    })
+    const points = [
+      [121.51, 31.55],
+      [132.87, 32.61],
+      [127.11, 30.41]
+    ]
+    for(let point of points) {
+      let iconFeature = new ol.Feature({
+        geometry: new ol.geom.Point(ol.proj.transform(point, 'EPSG:4326', 'baidu'), 'XY')
+      })
+      markVectorSource.addFeature(iconFeature)
     }
-});
+    map.addLayer(markVectorLayer)
+  }
+})
 
-var mapLayer = new ol.layer.Tile({
-    source: source
-});
-
-new ol.Map({
-    layers: [
-        mapLayer
-    ],
-    view: new ol.View({
-        center: ol.proj.transform([113.03914, 28.20354], 'EPSG:4326', 'BD:09'),
-        projection: 'BD:09',
-        zoom: 14
-    }),
-    target: 'map'
-});
-
-})()
