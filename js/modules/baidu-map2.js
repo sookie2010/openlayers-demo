@@ -46,9 +46,9 @@ define(['../../lib/ol', '../../lib/projzh'], function(ol, projzh) {
   const mousePositionControl = new ol.control.MousePosition({
     projection: 'EPSG:4326'
   })
-  const initMap = function() {
+  const initMap = function(target) {
     const map = new ol.Map({
-      target: 'map',
+      target,
       layers: [baiduLayer],
       view: new ol.View({
         center: ol.proj.transform([121.51, 31.55], 'EPSG:4326', 'baidu'),
