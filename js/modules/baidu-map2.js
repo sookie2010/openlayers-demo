@@ -47,40 +47,19 @@ define(['../../lib/openlayers/ol', '../../lib/projzh'], function(ol, projzh) {
     projection: 'EPSG:4326'
   })
   const initMap = function(target) {
-    const map = new ol.Map({
+    return new ol.Map({
       target,
       layers: [baiduLayer],
       view: new ol.View({
-        center: ol.proj.transform([121.51, 31.55], 'EPSG:4326', 'baidu'),
+        center: ol.proj.transform([119.51, 29.55], 'EPSG:4326', 'baidu'),
         zoom: 6,
+        minZoom: 6,
+        maxZoom: 15,
         projection: 'baidu',
         extent: bd09Extent
       }),
       controls: ol.control.defaults().extend([scaleLineControl, mousePositionControl])
     })
-    // 地图标点
-    const markVectorSource = new ol.source.Vector()
-    const markVectorLayer = new ol.layer.Vector({
-      source: markVectorSource,
-      style: new ol.style.Style({
-        image: new ol.style.Icon({
-          opacity: 0.75,
-          src: '../images/map_marker.png'
-        }),
-      })
-    })
-    const points = [
-      [121.51, 31.55],
-      [132.87, 32.61],
-      [127.11, 30.41]
-    ]
-    for(let point of points) {
-      let iconFeature = new ol.Feature({
-        geometry: new ol.geom.Point(ol.proj.transform(point, 'EPSG:4326', 'baidu'), 'XY')
-      })
-      markVectorSource.addFeature(iconFeature)
-    }
-    map.addLayer(markVectorLayer)
   }
   return initMap
 })

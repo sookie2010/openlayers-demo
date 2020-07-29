@@ -4,10 +4,62 @@
   <meta charset="utf-8" />
   <link rel="stylesheet" href="./css/reset.css" type="text/css" />
   <link rel="stylesheet" href="./lib/openlayers/ol.css" type="text/css" />
+  <link rel="stylesheet" href="./lib/bootstrap.min.css" type="text/css"/>
   <title>OpenLayers(百度地图在线图源)</title>
+  <style>
+    .map-container {
+      height: 100vh;
+      position: relative;
+    }
+    .map-container > #map {
+      height: 100%;
+      margin-right: 300px;
+    }
+    .map-container > #setting-panel {
+      position: absolute;
+      right: 0;
+      top: 0;
+      width: 300px;
+      height: 100%;
+      padding: 10px;
+    }
+  </style>
 </head>
 <body>
-  <div id="map" style="height: 100vh"></div>
+  <div class="map-container">
+    <div id="map"></div>
+    <div id="setting-panel" class="overflow-auto">
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" v-model="clickMark" id="defaultCheck1">
+        <label class="form-check-label" for="defaultCheck1">地图点击标点</label>
+      </div>
+      <div class="input-group input-group-sm mb-3">
+        <div class="input-group-prepend">
+          <span class="input-group-text">经度</span>
+        </div>
+        <input type="text" class="form-control" v-model.number="markpoint.longitude" />
+      </div>
+      <div class="input-group input-group-sm mb-3">
+        <div class="input-group-prepend">
+          <span class="input-group-text">经度</span>
+        </div>
+        <input type="text" class="form-control" v-model.number="markpoint.latitude" />
+      </div>
+      <div class="btn-group btn-group-sm" role="group" >
+        <button type="button" class="btn btn-primary" @click="addPoint">添加标记点</button>
+        <button type="button" class="btn btn-danger" @click="clearAll">全部清空</button>
+      </div>
+      
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item" v-for="(item,index) in  pointList" :key="index" :title="item.coordinate.join(',')">
+          {{ item.coordinate.map(item => +item.toFixed(3)).join(',') }}
+          <button type="button" class="close float-right" @click="removePoint(index)">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </li>
+      </ul>
+    </div>
+  </div>
   <script src="./lib/require.js" data-main="js/main-map2"></script>
 </body>
 </html>
