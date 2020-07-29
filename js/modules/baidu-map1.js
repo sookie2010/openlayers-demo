@@ -1,4 +1,4 @@
-define(['../../lib/ol'], function(ol) {
+define(['../../lib/ol', '../../lib/bd09'], function(ol, bd09) {
   return function(){
     /* 定义百度投影，这是实现无偏移加载百度地图离线瓦片核心所在。
     网上很多相关资料在用OpenLayers加载百度地图离线瓦片时都认为投影就是EPSG:3857(也就是Web墨卡托投影)。
@@ -16,10 +16,10 @@ define(['../../lib/ol'], function(ol) {
     ol.proj.addProjection(projBD09);
     ol.proj.addCoordinateTransforms("EPSG:4326", "BD:09",
       function (coordinate) {
-        return lngLatToMercator(coordinate);
+        return bd09.lngLatToMercator(coordinate);
       },
       function (coordinate) {
-        return mercatorToLngLat(coordinate);
+        return bd09.mercatorToLngLat(coordinate);
       }
     );
 
