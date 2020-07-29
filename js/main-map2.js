@@ -1,8 +1,7 @@
-require(['./modules/baidu-map2',
-  '../lib/openlayers/ol',
-  '../lib/projzh',
-  '../lib/vue.min.js'], function(initMap, ol, projzh, Vue){
-  const map = initMap('map')
+require(['./modules/baidu-map2', '../lib/vue.min.js'], function(baiduMap, Vue){
+  const map = baiduMap.initMap('map')
+  const ol = baiduMap.ol
+  const projzh = baiduMap.projzh
   // 地图标点
   const markVectorSource = new ol.source.Vector()
   const markVectorLayer = new ol.layer.Vector({

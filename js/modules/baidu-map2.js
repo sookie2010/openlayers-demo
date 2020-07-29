@@ -13,31 +13,38 @@ define(['../../lib/openlayers/ol', '../../lib/projzh'], function(ol, projzh) {
   for (let i = 0 ; i < 19 ; i++) {
     bmercResolutions[i] = Math.pow(2, 18 - i)
   }
-
-  const baiduLayer = new ol.layer.Tile({
-    source: new ol.source.XYZ({
-      projection: 'baidu',
-      maxZoom: 18,
-      tileUrlFunction: function(tileCoord) {
-        let x = tileCoord[1]
-        let y = -tileCoord[2] - 1
-        let z = tileCoord[0]
-        let hash = (x << z) + y
-        let index = (hash + 4) % 4
-        if (x < 0) {
-          x = 'M' + -x
-        }
-        if (y < 0) {
-          y = 'M' + -y
-        }
-        return `http://maponline${index}.bdimg.com/tile/?qt=vtile&x=${x}&y=${y}&z=${z}&styles=pl&scaler=1&udt=20191119`
-      },
-      tileGrid: new ol.tilegrid.TileGrid({
-        resolutions: bmercResolutions,
-        origin: [0, 0]
-      })
+  const source = new ol.source.XYZ({
+    projection: 'baidu',
+    tileUrlFunction: function(tileCoord) {
+      let x = tileCoord[1]
+      let y = -tileCoord[2] - 1
+      let z = tileCoord[0]
+      let hash = (x << z) + y
+      let index = (hash + 4) % 4
+      if (x < 0) {
+        x = 'M' + -x
+      }
+      if (y < 0) {
+        y = 'M' + -y
+      }
+      return `http://maponline${index}.bdimg.com/tile/?qt=vtile&x=${x}&y=${y}&z=${z}&styles=pl&scaler=1&udt=20191119`
+    },
+    tileGrid: new ol.tilegrid.TileGrid({
+      resolutions: bmercResolutions,
+      origin: [0, 0]
     })
   })
+  const createView = function(zoom = 8) {
+    const view = new ol.View({
+      center: ol.proj.transform([119.51, 29.55], 'EPSG:4326', 'baidu'),
+      zoom,
+      minZoom: 6,
+      maxZoom: 17,
+      projection: 'baidu',
+      extent: bd09Extent
+    })
+    return view
+  }
   // 比例尺
   const scaleLineControl = new ol.control.ScaleLine({
     units: 'metric',                     //设置比例尺单位，有degrees、imperial、us、nautical或metric
@@ -46,21 +53,19 @@ define(['../../lib/openlayers/ol', '../../lib/projzh'], function(ol, projzh) {
   const mousePositionControl = new ol.control.MousePosition({
     projection: 'EPSG:4326'
   })
+  // 鹰眼地图
+  const overviewMapControl = new ol.control.OverviewMap({
+    layers: [ new ol.layer.Tile({source}) ],
+    view: createView(3)
+  })
   const initMap = function(target) {
     return new ol.Map({
       target,
-      layers: [baiduLayer],
-      view: new ol.View({
-        center: ol.proj.transform([119.51, 29.55], 'EPSG:4326', 'baidu'),
-        zoom: 6,
-        minZoom: 6,
-        maxZoom: 15,
-        projection: 'baidu',
-        extent: bd09Extent
-      }),
-      controls: ol.control.defaults().extend([scaleLineControl, mousePositionControl])
+      layers: [ new ol.layer.Tile({source}) ],
+      view: createView(),
+      controls: ol.control.defaults().extend([scaleLineControl, mousePositionControl, overviewMapControl])
     })
   }
-  return initMap
+  return { initMap, ol, projzh }
 })
 
