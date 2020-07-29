@@ -3,11 +3,47 @@
 <head>
   <meta charset="utf-8" />
   <title>目录</title>
+  <link rel="stylesheet" href="./lib/bootstrap.min.css" type="text/css"/>
+  <style>
+    .card-container {
+      padding: 10px;
+    }
+    .card-container > .card {
+      display: inline-block;
+      width: 18rem;
+    }
+  </style>
 </head>
 <body>
-  <div><a href="./openlayers.html">Openlayers官方Demo</a></div>
-  <div><a href="./openlayers_baidu_offline.html">OpenLayers(百度地图离线图源)</a></div>
-  <div><a href="./openlayers_baidu_online.html">OpenLayers(百度地图在线图源)</a></div>
-  <div><a href="./baidumap_online.html">百度在线地图Demo</a></div>
+  <div class="card-container">
+  <div class="card" >
+    <div class="card-body">
+      <h5 class="card-title">Openlayers官方Demo</h5>
+      <p class="card-text">使用OSM图源</p>
+      <a href="./openlayers.html" class="btn btn-primary">打开</a>
+    </div>
+  </div>
+  <div class="card" >
+    <div class="card-body">
+      <h5 class="card-title">百度地图（离线）</h5>
+      <p class="card-text">OpenLayers（百度地图离线图源）</p>
+      <a href="./openlayers_baidu_offline.html" class="btn btn-primary">打开</a>
+    </div>
+  </div>
+  <div class="card" >
+    <div class="card-body">
+      <h5 class="card-title">百度地图（在线）</h5>
+      <p class="card-text">OpenLayers（百度地图在线图源）</p>
+      <a href="./openlayers_baidu_online.html" class="btn btn-primary">打开</a>
+    </div>
+  </div>
+  <div class="card" >
+    <div class="card-body">
+      <h5 class="card-title">百度在线地图</h5>
+      <p class="card-text">官方Demo</p>
+      <a href="./baidumap_online.html" class="btn btn-primary">打开</a>
+    </div>
+  </div>
+  </div>
 </body>
 </html>

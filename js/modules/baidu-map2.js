@@ -1,4 +1,4 @@
-define(['../../lib/ol', '../../lib/projzh'], function(ol, projzh) {
+define(['../../lib/openlayers/ol', '../../lib/projzh'], function(ol, projzh) {
   const bd09Extent = [-20037726.37, -12474104.17, 20037726.37, 12474104.17]
   const baiduMercator = new ol.proj.Projection({
     code: 'baidu',

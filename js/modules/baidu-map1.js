@@ -1,4 +1,4 @@
-define(['../../lib/ol', '../../lib/bd09'], function(ol, bd09) {
+define(['../../lib/openlayers/ol', '../../lib/bd09'], function(ol, bd09) {
   /* 定义百度投影，这是实现无偏移加载百度地图离线瓦片核心所在。
   网上很多相关资料在用OpenLayers加载百度地图离线瓦片时都认为投影就是EPSG:3857(也就是Web墨卡托投影)。
   事实上这是错误的，因此无法做到无偏移加载。
